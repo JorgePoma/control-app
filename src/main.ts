@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { RabbitMQ } from './common/constants';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,7 +32,9 @@ async function bootstrap() {
     },
   );
 
-  await app.startAllMicroservices();
+  await app.startAllMicroservices()
+  .then(() => Logger.log('Microservicio conectado correctamente', 'Bootstrap'))
+  .catch((err) => Logger.error('Error al conectar el microservicio', err, 'Bootstrap'));
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

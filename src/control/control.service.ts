@@ -18,7 +18,7 @@ export class ControlService {
   async create(createControlDto: CreateControlDto) {
     const { userId } = createControlDto;
     await this.validateUser(userId);
-    await this.validateState(userId);
+    await this.validateState(createControlDto);
     return await this.controlModel.create(createControlDto);
   }
 
@@ -32,14 +32,15 @@ export class ControlService {
     )
   }
 
-  async validateState(id: Types.ObjectId) {
+  async validateState(data: CreateControlDto) {
+    const { userId, type } = data;
     const currentControl = await this.controlModel
-      .findOne({ userId: id })
+      .findOne({ userId })
       .sort({ createdAt: -1 })
       .exec();
 
-    if (currentControl && currentControl.type === ControlType.IN) {
-      throw new HttpException('El usuario ya ha registrado su entrada', HttpStatus.BAD_REQUEST);
+    if (currentControl && (currentControl.type === type)) {
+      throw new HttpException(`El usuario ya ha registrado su ${type === ControlType.IN ? 'entrada' : 'salida'}`, HttpStatus.BAD_REQUEST);
     }
   }
 
